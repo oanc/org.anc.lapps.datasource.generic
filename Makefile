@@ -1,6 +1,6 @@
 VERSION=$(shell cat VERSION)
-WAR=target/GenericDatasource\#$(VERSION).war
-IMAGE=lappsgrid/generic-datasource
+WAR=target/FDRDatasource\#$(VERSION).war
+IMAGE=lappsgrid/fdr-datasource
 
 war:
 	mvn package

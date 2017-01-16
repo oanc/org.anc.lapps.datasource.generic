@@ -23,7 +23,7 @@
         <java.version>1.8</java.version>
     </properties>
     <build>
-        <finalName>GenericDatasource#${project.version}</finalName>
+        <finalName>FDRDatasource#${project.version}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.anc.maven.plugins</groupId>

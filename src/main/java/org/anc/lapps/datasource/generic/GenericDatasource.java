@@ -210,7 +210,7 @@ public class GenericDatasource implements DataSource
 					.allow(Discriminators.Uri.ANY)
 					.encoding("UTF-8")
 					.format(Uri.LIF)
-					.description("Generic DataSource")
+					.description("Documents from the FDR Presidential Library.")
 					.license(Discriminators.Uri.APACHE2)
 					.build();
 			Data data = new Data();
