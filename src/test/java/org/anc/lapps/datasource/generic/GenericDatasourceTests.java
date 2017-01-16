@@ -30,7 +30,7 @@ import org.lappsgrid.serialization.Serializer;
  */
 public class GenericDatasourceTests
 {
-	protected GenericDatasource datasource;
+	protected DataSource datasource;
 
 	public GenericDatasourceTests()
 	{
@@ -40,8 +40,8 @@ public class GenericDatasourceTests
 	@Before
 	public void setup()
 	{
-		System.setProperty(GenericDatasource.PROPERTY_NAME, "/var/corpora/FDR/index.txt");
-		datasource = new GenericDatasource();
+		System.setProperty(DataSource.PROPERTY_NAME, "/var/corpora/FDR/index.txt");
+		datasource = new DataSource();
 	}
 
 	@After

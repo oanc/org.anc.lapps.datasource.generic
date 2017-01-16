@@ -12,7 +12,7 @@
     <groupId>org.anc.lapps</groupId>
     <artifactId>generic-datasource</artifactId>
     <version>1.0.0</version>
-    <name>Generic DataSource</name>
+    <name>FDR DataSource</name>
     <packaging>war</packaging>
     <properties>
         <lapps.api.version>2.0.1</lapps.api.version>
@@ -23,7 +23,7 @@
         <java.version>1.8</java.version>
     </properties>
     <build>
-        <finalName>FDRDatasource#${project.version}</finalName>
+        <finalName>FDRDataSource#${project.version}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.anc.maven.plugins</groupId>

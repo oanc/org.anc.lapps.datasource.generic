@@ -1,3 +1,5 @@
-String url = "http://grid.anc.org:9080/FDRDatasource/1.0.0/GenericDatasource"
+String url = "http://grid.anc.org:9080/FDRDataSource/1.0.0/services/DataSource"
 ServiceClient client = new ServiceClient(url, null, null)
-println client.getMetadata()
+String json = client.execute(new Data(Uri.GET, '002').asJson())
+println groovy.json.JsonOutput.prettyPrint(json)
+

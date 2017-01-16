@@ -4,7 +4,7 @@
 # parsed and passed to the docker build as a `--build-arg`
 
 version=`cat ../../../VERSION`
-war=FDRDatasource\#$version.war
+war=FDRDataSource\#$version.war
 args=
 
 if [ "$1" = "--no-cache" ] ; then
@@ -12,10 +12,12 @@ if [ "$1" = "--no-cache" ] ; then
 fi
 
 if [ ! -e $war ] ; then
+    echo "Copying war file"
     cp ../../../target/$war .
 fi
 
 if [ ! -e FDR.tgz ] ; then
     wget http://downloads.lappsgrid.org/FDR.tgz
 fi
+
 docker build $args --build-arg VERSION=$version -t lappsgrid/fdr-datasource .
