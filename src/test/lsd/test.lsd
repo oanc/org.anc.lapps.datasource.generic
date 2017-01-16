@@ -1,5 +1,7 @@
 #!/usr/bin/env lsd
 
+VERSION = new File('VERSION').text
+
 void prettyPrint(String json) {
 	println groovy.json.JsonOutput.prettyPrint(json)
 }
@@ -27,7 +29,7 @@ else {
     println "docker ps".execute().text
 }
 
-String url = "http://localhost:8080/GenericDatasource/1.0.0/services/GenericDatasource"
+String url = "http://localhost:8080/GenericDatasource/$VERSION/services/GenericDatasource"
 ServiceClient service = new ServiceClient(url)
 String json = service.getMetadata()
 prettyPrint json
