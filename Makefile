@@ -17,6 +17,9 @@ docker:
 push:
 	docker push $(IMAGE)
 
+deploy:
+    scp -P 22022 $WAR suderman@grid.anc.org:/usr/share/tomcat/server-1/webapps
+
 tag:
 	@echo "Tagging Docker image $VERSION"
 	cd src/main/docker && ./build.sh
