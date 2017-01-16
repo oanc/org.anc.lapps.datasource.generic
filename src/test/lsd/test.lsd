@@ -27,7 +27,7 @@ else {
     println "docker ps".execute().text
 }
 
-String url = "http://localhost:8080/GenericDatasource/1.0.0-SNAPSHOT/services/GenericDatasource"
+String url = "http://localhost:8080/GenericDatasource/1.0.0/services/GenericDatasource"
 ServiceClient service = new ServiceClient(url)
 String json = service.getMetadata()
 prettyPrint json
@@ -39,9 +39,9 @@ data.payload = [:]
 json = data.asJson()
 json = service.execute(json)
 //println json
-//prettyPrint json
+prettyPrint json
 data = Serializer.parse(json, Data)
-assert 107 == data.payload.size() : "Wrong number of items in datasource."
+assert 107 == data.payload.size() // : "Wrong number of items in datasource."
 def index = data.payload
 
 json = service.execute(new Data(Uri.GET, index[0]).asJson())
