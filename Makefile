@@ -20,6 +20,7 @@ push:
 tag:
 	@echo "Tagging Docker image $VERSION"
 	cd src/main/docker && ./build.sh
+	docker tag $(IMAGE) $(IMAGE):$(VERSION)
 	docker push $(IMAGE):$(VERSION)
 
 clean:

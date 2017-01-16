@@ -66,7 +66,7 @@ public class GenericDatasource implements DataSource
 		if (path == null)
 		{
 			//cachedError = error("DATASOURCE_INDEX property was not set.");
-			path = "/var/corpora/FDR/index.txt";
+			path = "/var/lib/datasource/index.txt";
 		}
 //		else
 //		{

@@ -54,13 +54,6 @@
         </plugins>
     </build>
     <dependencies>
-        <!--
-        <dependency>
-            <groupId>org.anc</groupId>
-            <artifactId>index</artifactId>
-            <version>${anc.index.version}</version>
-        </dependency>
-        -->
         <dependency>
             <groupId>org.lappsgrid</groupId>
             <artifactId>discriminator</artifactId>
