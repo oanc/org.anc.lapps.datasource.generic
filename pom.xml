@@ -11,7 +11,7 @@
 
     <groupId>org.anc.lapps</groupId>
     <artifactId>generic-datasource</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>Generic DataSource</name>
     <packaging>war</packaging>
     <properties>
