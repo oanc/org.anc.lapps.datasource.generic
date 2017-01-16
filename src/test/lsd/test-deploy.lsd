@@ -1,0 +1,3 @@
+String url = "http://grid.anc.org:9080/FDRDatasource/1.0.0/GenericDatasource"
+ServiceClient client = new ServiceClient(url, null, null)
+println client.getMetadata()
