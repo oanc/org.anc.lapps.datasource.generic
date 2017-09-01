@@ -29,16 +29,16 @@ import static org.lappsgrid.discriminator.Discriminators.Uri;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -49,13 +49,14 @@ public class GenericDatasource implements DataSource
 {
 	private static final Logger logger = LoggerFactory.getLogger(GenericDatasource.class);
 
-	public static final String PROPERTY_NAME = "DATASOURCE_INDEX";
+	public static final String PROPERTY_NAME = "DATASOURCE_PATH";
 
 	private String metadata;
-	private Map<String, File> index;
-	private List<String> keys;
+//	private Map<String, File> index;
+	private List<String> files;
 
 	private String cachedError;
+	private Path directory;
 
 	public GenericDatasource()
 	{
@@ -66,13 +67,10 @@ public class GenericDatasource implements DataSource
 		if (path == null)
 		{
 			//cachedError = error("DATASOURCE_INDEX property was not set.");
-			path = "/var/lib/datasource/index.txt";
+			path = "/var/lib/datasource";
 		}
-//		else
-//		{
-		logger.info("Loading DataSource index from {}", path);
-			loadIndex(path);
-//		}
+		logger.info("Using {} as the DataSource.", path);
+		directory = Paths.get(path);
 	}
 
 
@@ -109,78 +107,19 @@ public class GenericDatasource implements DataSource
 		switch (discriminator)
 		{
 			case Uri.SIZE:
-				Data<Integer> sizeData = new Data<Integer>();
-				Data d;
-
-				sizeData.setDiscriminator(Uri.OK);
-				sizeData.setPayload(index.size());
-				result = Serializer.toJson(sizeData);
+				result = size();
 				break;
 			case Uri.LIST:
-				Map payload = (Map) data.getPayload();
-				if (payload == null)
-				{
-					payload = new HashMap<String,String>();
-				}
-
-				List<String> list = keys;
-				Object startValue = payload.get("start");
-				if (startValue != null)
-				{
-					int start = 0;
-					int offset = Integer.parseInt(startValue.toString());
-					if (offset >= 0) {
-						start = offset;
-					}
-					int end = index.size();
-					Object endValue = payload.get("end");
-					if (endValue != null)
-					{
-						offset = Integer.parseInt(endValue.toString());
-						if (offset >= start) {
-							end = offset;
-						}
-					}
-					list = keys.subList(start, end);
-				}
-				Data<java.util.List<String>> listData = new Data<>();
-				listData.setDiscriminator(Uri.STRING_LIST);
-				listData.setPayload(list);
-				result = Serializer.toJson(listData);
+				result = list(data);
 				break;
 			case Uri.GET:
-				String key = data.getPayload().toString();
-				if (key == null)
-				{
-					result = error("No key value provided");
-				}
-				else
-				{
-					File file = index.get(key);
-					if (file == null)
-					{
-						result = error("No file with key " + key);
-					}
-					else if (!file.exists())
-					{
-						result = error("File not found: " + file.getPath());
-					}
-					else
-					{
-						try
-						{
-							result = new String(Files.readAllBytes(file.toPath()));
-						}
-						catch (IOException e)
-						{
-							result = error(e.getMessage());
-						}
-					}
-
-				}
+				result = get(data);
 				break;
 			case Uri.GETMETADATA:
 				result = metadata;
+				break;
+			case Uri.QUERY:
+				result = query(data);
 				break;
 			default:
 				String message = String.format("Invalid discriminator: %s, Uri.List is %s", discriminator, Uri.LIST);
@@ -221,81 +160,206 @@ public class GenericDatasource implements DataSource
 		return metadata;
 	}
 
-	protected String[] addKey(String[] key) {
-		logger.trace("Key: {} Path: {}", key[0], key[1]);
-		keys.add(key[0]);
-		index.put(key[0], new File(key[1]));
-		return key;
-	}
-
-	protected void loadIndex(String path)
+	protected void listDirectory()
 	{
-		logger.debug("Loading the index from {}", path);
-		keys = new ArrayList<>();
-		try
-		{
-			Stream<String> stream = Files.lines(Paths.get(path));
-			index = stream.map(s -> s.split(" +"))
-					.map(a -> {keys.add(a[0]); return a;})
-					.collect(Collectors.toMap(a->a[0], a->new File(a[1])));
-			logger.debug("Index contains {} entries", index.size());
-//			map.forEach((k,v) -> System.out.println(k + " = " + v));
-		}
-		catch (IOException e)
-		{
-			logger.error("Unable to load the index.", e);
-			index = new HashMap<>();
-		}
-	}
-
-	protected void _loadIndex(String path)
-	{
-		keys = new ArrayList<>();
-		index = new HashMap<>();
-		File file = new File(path);
-		if (!file.exists()) {
-			logger.error("Index index file does not exist. {}", path);
-		}
-		else {
-			try(BufferedReader reader = new BufferedReader(new FileReader(file)))
+		if (Files.exists(directory)) {
+			try
 			{
-				String line = reader.readLine();
-				while (line != null) {
-					logger.trace("Parsing line: {}", line);
-					String[] parts = line.split(" +");
-					if (parts.length != 2) {
-						logger.warn("Invalid line in index: {}", line);
-					}
-					else {
-						keys.add(parts[0]);
-						index.put(parts[0], new File(parts[1]));
-					}
-					line = reader.readLine();
-				}
+				files = Files.list(directory)
+						.map(p -> p.getFileName().toString())
+						.filter(s -> !s.startsWith("."))
+						.collect(Collectors.toList());
 			}
 			catch (IOException e)
 			{
-				logger.error("Error reading the index.", e);
+				cachedError = error(e.getMessage());
 			}
 		}
-//		try(Stream<String> stream = Files.lines(Paths.get(path)))
-//		{
-//			stream.map( s -> s.split(" "))
-//					.map( this::addKey );
-//					.collect(Collectors.toMap(a->a[0], a->new File(a[1])));
-//		}
-//		catch (IOException e) {
-		//	 Initialize index to prevent NPEs
-//			logger.error("Unable to load the index.", e);
-//			index = new HashMap<>();
-//			cachedError = error(e.getMessage());
-//		}
-		logger.debug("Index contains {} entries", index.size());
+		else
+		{
+			cachedError = error("Datasource directory not found.");
+		}
 	}
 
+	protected String size()
+	{
+		if (files == null) {
+			listDirectory();
+			if (cachedError != null) {
+				return cachedError;
+			}
+		}
+		return new Data<Integer>(Uri.OK, files.size()).asJson();
+	}
+
+	protected String get(Data data)
+	{
+		String result = null;
+		String key = data.getPayload().toString();
+		if (key == null)
+		{
+			result = error("No key value provided");
+		}
+		else
+		{
+			Path filePath = Paths.get(directory.toString(), key);
+			if (Files.exists(filePath)) {
+				try
+				{
+					result = Files.lines(filePath)
+							.collect(Collectors.joining("\n"));
+				}
+				catch (IOException e)
+				{
+					result = error(e.getMessage());
+				}
+			}
+		}
+		return result;
+	}
+
+	protected String list(Data data)
+	{
+		Map payload = (Map) data.getPayload();
+		if (payload == null)
+		{
+			payload = new HashMap<String,String>();
+		}
+		if (files == null) {
+			listDirectory();
+			if (cachedError != null) {
+				return cachedError;
+			}
+		}
+
+		List<String> list = new ArrayList<String>(files);
+		Object startValue = payload.get("start");
+		if (startValue != null)
+		{
+			int start = 0;
+			int offset = Integer.parseInt(startValue.toString());
+			if (offset >= 0) {
+				start = offset;
+			}
+			int end = files.size();
+			Object endValue = payload.get("end");
+			if (endValue != null)
+			{
+				offset = Integer.parseInt(endValue.toString());
+				if (offset >= start) {
+					end = offset;
+				}
+			}
+			list = files.subList(start, end);
+		}
+		Data<java.util.List<String>> listData = new Data<>();
+		listData.setDiscriminator(Uri.STRING_LIST);
+		listData.setPayload(list);
+		return Serializer.toJson(listData);
+	}
+
+	protected String query(Data data)
+	{
+		if (data.getPayload() == null)
+		{
+			return list(data);
+		}
+
+		if (files == null) {
+			listDirectory();
+			if (cachedError != null) {
+				return cachedError;
+			}
+		}
+
+		String pattern = data.getPayload().toString();
+		List<String> list = files.stream()
+				.filter(s -> s.contains(pattern))
+				.collect(Collectors.toList());
+
+		return new Data(Uri.STRING_LIST, list).asPrettyJson();
+	}
+
+//	protected String[] addKey(String[] key) {
+//		logger.trace("Key: {} Path: {}", key[0], key[1]);
+//		files.add(key[0]);
+//		index.put(key[0], new File(key[1]));
+//		return key;
+//	}
+
+//	protected void loadIndex(String path)
+//	{
+//		logger.debug("Loading the index from {}", path);
+//		files = new ArrayList<>();
+//		try
+//		{
+//			Stream<String> stream = Files.lines(Paths.get(path));
+//			index = stream.map(s -> s.split(" +"))
+//					.map(a -> {
+//						files.add(a[0]); return a;})
+//					.collect(Collectors.toMap(a->a[0], a->new File(a[1])));
+//			logger.debug("Index contains {} entries", index.size());
+////			map.forEach((k,v) -> System.out.println(k + " = " + v));
+//		}
+//		catch (IOException e)
+//		{
+//			logger.error("Unable to load the index.", e);
+//			index = new HashMap<>();
+//		}
+//	}
+//
+//	protected void _loadIndex(String path)
+//	{
+//		files = new ArrayList<>();
+//		index = new HashMap<>();
+//		File file = new File(path);
+//		if (!file.exists()) {
+//			logger.error("Index index file does not exist. {}", path);
+//		}
+//		else {
+//			try(BufferedReader reader = new BufferedReader(new FileReader(file)))
+//			{
+//				String line = reader.readLine();
+//				while (line != null) {
+//					logger.trace("Parsing line: {}", line);
+//					String[] parts = line.split(" +");
+//					if (parts.length != 2) {
+//						logger.warn("Invalid line in index: {}", line);
+//					}
+//					else {
+//						files.add(parts[0]);
+//						index.put(parts[0], new File(parts[1]));
+//					}
+//					line = reader.readLine();
+//				}
+//			}
+//			catch (IOException e)
+//			{
+//				logger.error("Error reading the index.", e);
+//			}
+//		}
+////		try(Stream<String> stream = Files.lines(Paths.get(path)))
+////		{
+////			stream.map( s -> s.split(" "))
+////					.map( this::addKey );
+////					.collect(Collectors.toMap(a->a[0], a->new File(a[1])));
+////		}
+////		catch (IOException e) {
+//		//	 Initialize index to prevent NPEs
+////			logger.error("Unable to load the index.", e);
+////			index = new HashMap<>();
+////			cachedError = error(e.getMessage());
+////		}
+//		logger.debug("Index contains {} entries", index.size());
+//	}
+
 	protected void dump() {
-		keys.forEach(k -> {
-			System.out.println(String.format("%s -> %s", k, index.get(k)));
+		if (files == null) {
+			listDirectory();
+		}
+		files.forEach(k -> {
+			//System.out.println(String.format("%s -> %s", k, index.get(k)));
+			System.out.println(k);
 		});
 	}
 

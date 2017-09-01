@@ -7,11 +7,15 @@ version=`cat ../../../VERSION`
 war=GenericDatasource\#$version.war
 args=
 
+echo "Version: $version"
+echo "WAR    : $war"
+ 
 if [ "$1" = "--no-cache" ] ; then
 	args=--no-cache
 fi
 
 if [ ! -e $war ] ; then
+	echo "Copying war file."
     cp ../../../target/$war .
 fi
 

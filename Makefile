@@ -5,8 +5,17 @@ IMAGE=lappsgrid/generic-datasource
 war:
 	mvn package
 
-test:
-	src/test/lsd/test.lsd
+test-fdr:
+	./src/test/lsd/test.lsd fdr /private/var/corpora/FDR
+
+#	src/test/lsd/test.lsd
+
+test-squad:
+	#src/test/lsd/squad.lsd
+	./src/test/lsd/test.lsd squad /private/var/corpora/Squad-dev-1.1
+
+test-bionlp:
+	./src/test/lsd/test.lsd bionlp /private/var/corpora/BIONLP2016-LIF/bionlp-st-ge-2016-coref
 
 login:
 	docker exec -it fdr /bin/bash

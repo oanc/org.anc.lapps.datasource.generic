@@ -1,28 +1,15 @@
 #!/usr/bin/env lsd
 
-if (args.size() != 2) {
-    println "USAGE: ./src/test/lsd/test.lsd <container> <path>"
-    println "EXAMPLE"
-    println "    ./src/test/lsd/test.lsd fdr /var/corpora/FDR"
-    return
-}
-
 VERSION = new File('VERSION').text
-CONTAINER=args[0]
-DIR=args[1]
 
-if (!CONTAINER) {
-    println "No container name provided."
-    return
-}
 void prettyPrint(String json) {
 	println groovy.json.JsonOutput.prettyPrint(json)
 }
 
 boolean shutdown = false
-if (!isRunning(CONTAINER)) {
-    println "Starting the docker container $CONTAINER."
-    String cmd = "docker run -d -p 8080:8080 --name $CONTAINER -v $DIR:/var/lib/datasource lappsgrid/generic-datasource"
+if (!isRunning('squad')) {
+    println "Starting the docker container."
+    String cmd = "docker run -d -p 8080:8080 --name squad -v /private/var/corpora/Squad-dev-1.1:/var/lib/datasource --privileged=true lappsgrid/generic-datasource"
     println cmd
     String result = cmd.execute().text
     if (! result || result.size() == 0) {
@@ -56,14 +43,7 @@ json = service.execute(json)
 //println json
 prettyPrint json
 data = Serializer.parse(json, Data)
-
-int expectedSize = 0
-new File(DIR).eachFile { File f ->
-    if (!f.name.startsWith('.')) {
-        ++expectedSize
-    }
-}
-assert expectedSize == data.payload.size()
+assert 108 == data.payload.size() // : "Wrong number of items in datasource."
 def index = data.payload
 
 json = service.execute(new Data(Uri.GET, index[0]).asJson())
@@ -72,6 +52,13 @@ assert Uri.LIF == data.discriminator : data.payload
 println data.discriminator
 println data.payload
 println "All tests passed."
+if (shutdown) {
+	println "Shutting down the Docker container."
+	println "docker rm -f squad".execute().text
+}
+println "Done."
+return
+
 boolean isRunning(String image) {
 	"docker ps".execute().text.contains(image)
 }
