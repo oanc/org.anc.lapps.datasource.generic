@@ -11,15 +11,15 @@
 
     <groupId>org.anc.lapps</groupId>
     <artifactId>generic-datasource</artifactId>
-    <version>1.2.0</version>
+    <version>1.3.0-SNAPSHOT</version>
     <name>Generic DataSource</name>
     <packaging>war</packaging>
     <properties>
         <lapps.api.version>2.0.1</lapps.api.version>
-        <lapps.core.version>2.0.2</lapps.core.version>
-        <lapps.discriminator.version>2.3.0</lapps.discriminator.version>
-        <lapps.serialization.version>2.3.1</lapps.serialization.version>
-        <lapps.metadata.version>1.1.0</lapps.metadata.version>
+        <lapps.core.version>2.0.4</lapps.core.version>
+        <lapps.discriminator.version>2.3.2</lapps.discriminator.version>
+        <lapps.serialization.version>2.5.0</lapps.serialization.version>
+        <lapps.metadata.version>1.2.0</lapps.metadata.version>
         <java.version>1.8</java.version>
     </properties>
     <build>
@@ -84,7 +84,7 @@
         <dependency>
             <groupId>org.anc.json</groupId>
             <artifactId>validator</artifactId>
-            <version>1.1.0</version>
+            <version>1.1.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>

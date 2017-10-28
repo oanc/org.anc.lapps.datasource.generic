@@ -1,6 +1,7 @@
 VERSION=$(shell cat VERSION)
 WAR=target/GenericDatasource\#$(VERSION).war
 IMAGE=lappsgrid/generic-datasource
+COREF=/private/var/corpora/BIONLP2016-LIF/bionlp-st-ge-2016-coref
 
 war:
 	mvn package
@@ -17,14 +18,20 @@ test-squad:
 test-bionlp:
 	./src/test/lsd/test.lsd bionlp /private/var/corpora/BIONLP2016-LIF/bionlp-st-ge-2016-coref
 
-login:
-	docker exec -it fdr /bin/bash
-
 docker:
 	cd src/main/docker && ./build.sh
 
+login:
+	docker exec -it tomcat /bin/bash
+
+start:
+	docker run -d -p 8080:8080 --name tomcat -v $COREF:/var/lib/datasource lappsgrid/generic-datasource
+
+stop:
+	docker rm -f tomcat
+
 push:
-	docker push $(IMAGE)
+	docker push $(IMAGE):latest
 
 tag:
 	@echo "Tagging Docker image $VERSION"

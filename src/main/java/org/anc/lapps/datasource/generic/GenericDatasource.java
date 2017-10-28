@@ -52,7 +52,6 @@ public class GenericDatasource implements DataSource
 	public static final String PROPERTY_NAME = "DATASOURCE_PATH";
 
 	private String metadata;
-//	private Map<String, File> index;
 	private List<String> files;
 
 	private String cachedError;
@@ -146,7 +145,7 @@ public class GenericDatasource implements DataSource
 					.name(this.getClass().getName())
 					.version(Version.getVersion())
 					.vendor("http:/www.anc.org")
-					.allow(Discriminators.Uri.ANY)
+					.allow(Discriminators.Uri.ALL)
 					.encoding("UTF-8")
 					.format(Uri.LIF)
 					.description("Generic DataSource")
@@ -213,6 +212,9 @@ public class GenericDatasource implements DataSource
 				{
 					result = error(e.getMessage());
 				}
+			}
+			else {
+				result = error("No such document with key " + key);
 			}
 		}
 		return result;
