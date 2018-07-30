@@ -6,20 +6,44 @@
     <parent>
         <groupId>org.lappsgrid.maven</groupId>
         <artifactId>war-parent-pom</artifactId>
-        <version>2.0.5</version>
+        <version>2.1.0</version>
     </parent>
 
     <groupId>org.anc.lapps</groupId>
     <artifactId>generic-datasource</artifactId>
     <version>1.2.1</version>
     <name>Generic DataSource</name>
+    <description>A LAPPS Grid data source that can serve an arbitrary directory of files.</description>
     <packaging>war</packaging>
+
+    <url>https://github.com/oanc/org.anc.lapps.datasource.generic</url>
+    <licenses>
+        <license>
+            <name>The Apache License. Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+    <scm>
+        <url>https://github.com/oanc/org.anc.lapps.datasource.generic</url>
+        <connection>scm:git:https://github.com/oanc/org.anc.lapps.datasource.generic.git</connection>
+        <developerConnection>scm:git:https://github.com/oanc/org.anc.lapps.datasource.generic.git</developerConnection>
+    </scm>
+    <issueManagement>
+        <url>https://github.com/oanc/org.anc.lapps.datasource.generic/issues</url>
+        <system>GitHub issues</system>
+    </issueManagement>
+    <!--
+    <ciManagement>
+        <url>https://travis-ci.org/oanc/org.anc.lapps.datasource.generic</url>
+        <system>travis</system>
+    </ciManagement>
+    -->
     <properties>
         <lapps.api.version>2.0.1</lapps.api.version>
         <lapps.core.version>2.0.2</lapps.core.version>
-        <lapps.discriminator.version>2.3.0</lapps.discriminator.version>
-        <lapps.serialization.version>2.3.1</lapps.serialization.version>
-        <lapps.metadata.version>1.1.0</lapps.metadata.version>
+        <lapps.discriminator.version>2.3.2</lapps.discriminator.version>
+        <lapps.serialization.version>2.5.0</lapps.serialization.version>
+        <lapps.metadata.version>1.2.0</lapps.metadata.version>
         <java.version>1.8</java.version>
     </properties>
     <build>
