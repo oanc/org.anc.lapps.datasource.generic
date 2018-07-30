@@ -1,0 +1,37 @@
+#!/usr/bin/env lsd
+
+//if (args.size() != 2) {
+//    println "USAGE: ./src/test/lsd/test.lsd <container> <path>"
+//    println "EXAMPLE"
+//    println "    ./src/test/lsd/test.lsd fdr /var/corpora/FDR"
+//    return
+//}
+
+VERSION = new File('VERSION').text
+
+void prettyPrint(String json) {
+	println groovy.json.JsonOutput.prettyPrint(json)
+}
+
+
+String url = "http://localhost:8080/GenericDatasource/$VERSION/services/GenericDatasource"
+ServiceClient service = new ServiceClient(url)
+String json = service.getMetadata()
+prettyPrint json
+//return
+
+Data data = new Data()
+data.discriminator = Uri.LIST
+data.payload = [:]
+json = service.execute(data.asJson())
+prettyPrint json
+data = Serializer.parse(json, Data)
+
+def index = data.payload
+
+json = service.execute(new Data(Uri.GET, index[0]).asJson())
+data = Serializer.parse(json, Data)
+assert Uri.LIF == data.discriminator : data.payload
+println data.discriminator
+println data.payload
+println "All tests passed."

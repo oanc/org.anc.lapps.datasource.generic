@@ -69,12 +69,6 @@ public class GenericDatasourceTests
 	}
 
 	@Test
-	public void testDump()
-	{
-		datasource.dump();
-	}
-
-	@Test
 	public void testGet()
 	{
 		String json = datasource.execute(new Data(Discriminators.Uri.GET, "048").asJson());
@@ -94,6 +88,19 @@ public class GenericDatasourceTests
 	}
 
 	@Test
+	public void testListAll() {
+		Map<String,Integer> range = new HashMap<>();
+//		range.put("start", 10);
+//		range.put("end", 20);
+		String json = datasource.execute(new Data(Discriminators.Uri.LIST, range).asJson());
+		Data data = Serializer.parse(json, Data.class);
+		//System.out.println(data.asPrettyJson());
+		List<String> list = (List) data.getPayload();
+		assertEquals(141, list.size());
+	}
+
+
+	@Test
 	public void testQuery()
 	{
 		String pattern = "Discussion";
@@ -101,6 +108,9 @@ public class GenericDatasourceTests
 		Data data = Serializer.parse(json, Data.class);
 		//System.out.println(data.asPrettyJson());
 		List<String> list = (List) data.getPayload();
-		list.forEach(System.out::println);
+//		list.forEach(System.out::println);
+		for (String item : list) {
+			System.out.println(item);
+		}
 	}
 }

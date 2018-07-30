@@ -1,0 +1,35 @@
+#!/usr/bin/env lsd
+
+VERSION = new File('VERSION').text
+
+void prettyPrint(String json) {
+	println groovy.json.JsonOutput.prettyPrint(json)
+}
+
+
+String url = "http://149.165.156.221:8080/GenericDatasource/$VERSION/services/GenericDatasource"
+ServiceClient service = new ServiceClient(url)
+String json = service.getMetadata()
+prettyPrint json
+//return
+
+Data data = new Data()
+data.discriminator = Uri.LIST
+data.payload = [:]
+json = data.asPrettyJson()
+println json
+
+json = service.execute(data.asJson())
+prettyPrint json
+return
+
+data = Serializer.parse(json, Data)
+
+def index = data.payload
+
+json = service.execute(new Data(Uri.GET, index[0]).asJson())
+data = Serializer.parse(json, Data)
+assert Uri.LIF == data.discriminator : data.payload
+println data.discriminator
+println data.payload
+println "All tests passed."

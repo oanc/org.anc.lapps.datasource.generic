@@ -50,7 +50,7 @@ prettyPrint json
 
 Data data = new Data()
 data.discriminator = Uri.LIST
-data.payload = [:]
+data.payload = [start:0, end:145]
 json = data.asJson()
 json = service.execute(json)
 //println json
@@ -66,12 +66,22 @@ new File(DIR).eachFile { File f ->
 assert expectedSize == data.payload.size()
 def index = data.payload
 
+println index[0]
 json = service.execute(new Data(Uri.GET, index[0]).asJson())
-data = Serializer.parse(json, Data)
-assert Uri.LIF == data.discriminator : data.payload
+println "Execution complete."
+println json
+assert json != null
+assert json.size() > 0
+data = Serializer.parse(json)
 println data.discriminator
-println data.payload
+
+//json = data.asJson())
+//data = Serializer.parse(json, Data)
+assert data.payload, Uri.LIF == data.discriminator //: data.payload
+//println data.discriminator
+//println data.payload
 println "All tests passed."
+
 boolean isRunning(String image) {
 	"docker ps".execute().text.contains(image)
 }
