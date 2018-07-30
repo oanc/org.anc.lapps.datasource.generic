@@ -15,7 +15,7 @@ test-squad:
 	./src/test/lsd/test.lsd squad /private/var/corpora/Squad-dev-1.1
 
 test-bionlp:
-	./src/test/lsd/test.lsd bionlp /private/var/corpora/BIONLP2016-LIF/bionlp-st-ge-2016-coref
+	./src/test/lsd/test.lsd bionlp /var/corpora/BIONLP2016-LIF/bionlp-st-ge-2016-coref
 
 login:
 	docker exec -it fdr /bin/bash

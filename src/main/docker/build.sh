@@ -18,5 +18,6 @@ if [ ! -e $war ] ; then
 	echo "Copying war file."
     cp ../../../target/$war .
 fi
-
-docker build $args --build-arg VERSION=$version -t lappsgrid/generic-datasource .
+echo "Building Docker image"
+#docker build $args --build-arg VERSION=$version -t lappsgrid/generic-datasource .
+docker build -t lappsgrid/generic-datasource .

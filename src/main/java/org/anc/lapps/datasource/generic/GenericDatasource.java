@@ -29,18 +29,21 @@ import static org.lappsgrid.discriminator.Discriminators.Uri;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
 import java.io.FileReader;
+import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @author Keith Suderman
@@ -52,11 +55,10 @@ public class GenericDatasource implements DataSource
 	public static final String PROPERTY_NAME = "DATASOURCE_PATH";
 
 	private String metadata;
-//	private Map<String, File> index;
-	private List<String> files;
+	private List<File> files;
 
 	private String cachedError;
-	private Path directory;
+	private File directory;
 
 	public GenericDatasource()
 	{
@@ -70,7 +72,7 @@ public class GenericDatasource implements DataSource
 			path = "/var/lib/datasource";
 		}
 		logger.info("Using {} as the DataSource.", path);
-		directory = Paths.get(path);
+		directory = new File(path);
 	}
 
 
@@ -162,18 +164,16 @@ public class GenericDatasource implements DataSource
 
 	protected void listDirectory()
 	{
-		if (Files.exists(directory)) {
-			try
+		FileFilter filter = new FileFilter() {
+			@Override
+			public boolean accept(File pathname)
 			{
-				files = Files.list(directory)
-						.map(p -> p.getFileName().toString())
-						.filter(s -> !s.startsWith("."))
-						.collect(Collectors.toList());
+				return !pathname.getName().startsWith(".");
 			}
-			catch (IOException e)
-			{
-				cachedError = error(e.getMessage());
-			}
+		};
+
+		if (directory.exists()) {
+			files = Arrays.asList(directory.listFiles(filter));
 		}
 		else
 		{
@@ -206,8 +206,17 @@ public class GenericDatasource implements DataSource
 			if (Files.exists(filePath)) {
 				try
 				{
-					result = Files.lines(filePath)
-							.collect(Collectors.joining("\n"));
+//					result = Files.lines(filePath)
+//							.collect(Collectors.joining("\n"));
+					BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(filePath.toFile()), "UTF-8"));
+					StringWriter writer = new StringWriter();
+					String line = reader.readLine();
+					while (line != null) {
+						writer.write(line);
+						writer.write("\n");
+						line = reader.readLine();
+					}
+					result = writer.toString();
 				}
 				catch (IOException e)
 				{
@@ -232,16 +241,16 @@ public class GenericDatasource implements DataSource
 			}
 		}
 
-		List<String> list = new ArrayList<String>(files);
+		int start = 0;
+		int end = files.size();
+		List<String> list = new ArrayList<>();
 		Object startValue = payload.get("start");
 		if (startValue != null)
 		{
-			int start = 0;
 			int offset = Integer.parseInt(startValue.toString());
 			if (offset >= 0) {
 				start = offset;
 			}
-			int end = files.size();
 			Object endValue = payload.get("end");
 			if (endValue != null)
 			{
@@ -250,7 +259,9 @@ public class GenericDatasource implements DataSource
 					end = offset;
 				}
 			}
-			list = files.subList(start, end);
+		}
+		for (File file : files.subList(start, end)) {
+			list.add(file.getName());
 		}
 		Data<java.util.List<String>> listData = new Data<>();
 		listData.setDiscriminator(Uri.STRING_LIST);
@@ -272,10 +283,16 @@ public class GenericDatasource implements DataSource
 			}
 		}
 
-		String pattern = data.getPayload().toString();
-		List<String> list = files.stream()
-				.filter(s -> s.contains(pattern))
-				.collect(Collectors.toList());
+		final String pattern = data.getPayload().toString();
+		List<String> list = new ArrayList<>();
+		for (File file : files) {
+			if (file.getName().contains(pattern)) {
+				list.add(file.getName());
+			}
+		}
+//		List<String> list = files.stream()
+//				.filter(s -> s.contains(pattern))
+//				.collect(Collectors.toList());
 
 		return new Data(Uri.STRING_LIST, list).asPrettyJson();
 	}
@@ -353,15 +370,6 @@ public class GenericDatasource implements DataSource
 //		logger.debug("Index contains {} entries", index.size());
 //	}
 
-	protected void dump() {
-		if (files == null) {
-			listDirectory();
-		}
-		files.forEach(k -> {
-			//System.out.println(String.format("%s -> %s", k, index.get(k)));
-			System.out.println(k);
-		});
-	}
 
 	protected String error(String message)
 	{
